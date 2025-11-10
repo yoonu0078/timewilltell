@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2025 by yoonu0078 (http://jsbin.com/rileyuq/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>방명록 — Time Will Tell</title>
+<style>
+  body {
+    margin: 0;
+    padding: 40px;
+    font-family: "Inter", sans-serif;
+    background: #fff;
+    color: #111;
+  }
+  textarea {
+    width: 100%;
+    height: 120px;
+    margin-top: 10px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 10px;
+    resize: none;
+    font-size: 14px;
+  }
+  button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    border: none;
+    background: #111;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover { background: #333; }
+  a {
+    display: inline-block;
+    margin-top: 30px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #ccc;
+  }
+  a:hover { color: #000; border-color: #000; }
+</style>
+</head>
+<body>
+  <h1>방명록</h1>
+  <p>이곳은 방문자 메시지를 남길 수 있는 공간입니다 (현재는 로컬 저장만 지원).</p>
+
+  <textarea id="message" placeholder="메시지를 남겨주세요."></textarea><br>
+  <button onclick="saveMessage()">남기기</button>
+
+  <div id="log"></div>
+
+  <a href="main.html">← 메인으로 돌아가기</a>
+
+  <script>
+    function saveMessage() {
+      const msg = document.getElementById("message").value;
+      if (msg.trim() === "") return;
+      const log = document.getElementById("log");
+      const p = document.createElement("p");
+      p.textContent = "🩵 " + msg;
+      log.appendChild(p);
+      document.getElementById("message").value = "";
+    }
+  </script>
+</body>
+</html>
