@@ -29,7 +29,6 @@
     text-decoration: none;
     font-size: 20px;
     transition: transform 0.3s, background 0.3s, color 0.3s;
-    z-index: 10;
   }
 
   .circle:hover {
@@ -37,140 +36,44 @@
     color: white;
     transform: scale(1.2);
   }
-
-  canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
 </style>
 </head>
 <body>
 
-  <!-- 둥둥 떠다니는 원 -->
   <a href="./page1.html" class="circle" id="circle1">1</a>
   <a href="./page2.html" class="circle" id="circle2">2</a>
   <a href="./page3.html" class="circle" id="circle3">3</a>
 
-  <!-- 애니메이션용 캔버스 -->
-  <canvas id="scene"></canvas>
-
 <script>
-  /* ====== 1. 떠다니는 원 ====== */
   const circles = document.querySelectorAll('.circle');
+
+  // 각 원의 초기 랜덤 위치
   circles.forEach(circle => {
     circle.style.top = Math.random() * (window.innerHeight - 70) + 'px';
     circle.style.left = Math.random() * (window.innerWidth - 70) + 'px';
   });
 
+  // 부드럽게 떠다니는 모션
   circles.forEach(circle => {
     let x = parseFloat(circle.style.left);
     let y = parseFloat(circle.style.top);
-    let dx = (Math.random() - 0.5) * 1.5;
+    let dx = (Math.random() - 0.5) * 1.5; // 속도
     let dy = (Math.random() - 0.5) * 1.5;
 
     function move() {
       x += dx;
       y += dy;
+
+      // 벽에 부딪히면 반사
       if (x <= 0 || x >= window.innerWidth - 70) dx *= -1;
       if (y <= 0 || y >= window.innerHeight - 70) dy *= -1;
+
       circle.style.left = x + 'px';
       circle.style.top = y + 'px';
+
       requestAnimationFrame(move);
     }
     move();
-  });
-
-  /* ====== 2. 바닥 균열 + 입자 ====== */
-  const canvas = document.getElementById('scene');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  let crackVisible = false;
-  let particles = [];
-  let crackPath = [];
-
-  // 2초 뒤 균열 생성
-  setTimeout(() => {
-    crackVisible = true;
-    createCrack();
-  }, 2000);
-
-  // 3초 뒤 입자 떨어짐
-  setTimeout(() => {
-    generateParticles();
-  }, 3000);
-
-  function createCrack() {
-    const baseY = canvas.height * 0.8;
-    const step = canvas.width / 15;
-    crackPath = [];
-    for (let i = 0; i <= 15; i++) {
-      const x = i * step;
-      const y = baseY + (Math.random() - 0.5) * 40; // 지그재그
-      crackPath.push({ x, y });
-    }
-  }
-
-  function generateParticles() {
-    for (let i = 0; i < 250; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * -canvas.height,
-        r: Math.random() * 4 + 2,
-        vy: Math.random() * 2 + 2
-      });
-    }
-  }
-
-  function drawCrack() {
-    if (!crackVisible) return;
-    ctx.beginPath();
-    ctx.moveTo(crackPath[0].x, crackPath[0].y);
-    for (let i = 1; i < crackPath.length; i++) {
-      ctx.lineTo(crackPath[i].x, crackPath[i].y);
-    }
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-
-  function drawParticles() {
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "#000";
-      ctx.fill();
-
-      p.y += p.vy;
-      // 균열 근처에 닿으면 멈춤
-      const crackY = canvas.height * 0.8;
-      if (p.y >= crackY - Math.random() * 20) {
-        p.vy = 0;
-      }
-    });
-  }
-
-  function drawGround() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, canvas.height * 0.8, canvas.width, canvas.height * 0.2);
-  }
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGround();
-    drawCrack();
-    drawParticles();
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    createCrack();
   });
 </script>
 
