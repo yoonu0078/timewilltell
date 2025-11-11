@@ -1,41 +1,256 @@
 <!DOCTYPE html>
-<!--
-Created using JS Bin
-http://jsbin.com
-
-Copyright (c) 2025 by yoonu0078 (http://jsbin.com/makevux/1/edit)
-
-Released under the MIT license: http://jsbin.mit-license.org
--->
-<meta name="robots" content="noindex">
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>아카이빙 — Time Will Tell</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body {
-    margin: 0;
-    padding: 40px;
-    font-family: "Inter", sans-serif;
-    background: #eef6ff;
-    color: #111;
+  :root{
+    --bg:#eef6ff;
+    --ink:#111;
+    --card:#fff;
   }
-  ul { padding-left: 20px; }
-  a { display: inline-block; margin-top: 30px; color: #333; text-decoration: none; border-bottom: 1px solid #ccc; }
-  a:hover { color: #000; border-color: #000; }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:40px; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100svh; overflow:hidden;
+  }
+  header{position:relative; z-index:10}
+  h1{margin:0 0 6px 0; font-size:28px}
+  p{margin:0 0 20px 0; opacity:.7}
+  .hint{font-size:12px; opacity:.6}
+  .back{
+    position:fixed; left:24px; bottom:20px; z-index:10;
+    color:#333; text-decoration:none; border-bottom:1px solid #bbb; padding:3px 0;
+  }
+  .back:hover{color:#000; border-color:#000}
+
+  /* 캔버스 */
+  .sky{
+    position:fixed; inset:0; z-index:0; pointer-events:auto;
+  }
+
+  /* 스프라이트 컨테이너: 절대 배치 + 상하 떠다니기 */
+  .sprite{
+    position:absolute;
+    will-change:transform;
+    animation: floatY var(--floatDur,s) linear infinite alternate;
+  }
+
+  /* 좌우 표류 */
+  .drift{
+    animation: driftX var(--driftDur,s) linear infinite alternate;
+    will-change:transform;
+  }
+
+  /* 살짝 지글지글(흔들림/스케일) */
+  .wiggle{
+    display:block;
+    animation: wiggle var(--wiggleDur,s) ease-in-out infinite;
+    will-change:transform,filter;
+    transform-origin: 50% 50%;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
+  }
+
+ /* 기존 .card 부분을 이렇게 바꿔줘 */
+a.card {
+  display: block;
+  outline: none;
+  border-radius: 0;     /* 모서리 둥글게 X */
+  overflow: visible;    /* 이미지 주변 잘리지 않게 */
+  background: none;     /* 배경 없음 */
+  transition: transform .25s ease, filter .25s ease;
+}
+a.card:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.2)); /* 살짝 빛나는 효과 */
+}
+
+/* 그림자 줄이고 투명도 약간 */
+.wiggle {
+  display: block;
+  animation: wiggle var(--wiggleDur,s) ease-in-out infinite;
+  will-change: transform, filter;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.15));
+}
+  /* 모션 줄이기 지원 */
+  @media (prefers-reduced-motion: reduce){
+    .sprite,.drift,.wiggle{animation:none !important}
+  }
+
+  /* 키프레임 */
+  @keyframes floatY{
+    from{ transform: translateY(-14px) }
+    to  { transform: translateY(14px) }
+  }
+  @keyframes driftX{
+    from{ transform: translateX(-18px) }
+    to  { transform: translateX(18px) }
+  }
+  @keyframes wiggle{
+    0%  { transform: rotate(-1.6deg) scale(1.00) }
+    50% { transform: rotate( 1.2deg) scale(1.015) }
+    100%{ transform: rotate(-1.6deg) scale(1.00) }
+  }
+
+  /* 접근성: 화면리더용 대체 목록 (시각 숨김) */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
 </head>
 <body>
-  <h1>아카이빙</h1>
-  <p>they will tell</p>
-  <ul>
-    <li><a href="https://i.imgur.com/example1.png" target="_blank">1차 시안</a></li>
-    <li><a href="https://i.imgur.com/example2.png" target="_blank">전시 설치 사진</a></li>
+  <header>
+    <h1>아카이빙</h1>
+    <p>they will tell</p>
+    <div class="hint">이미지를 클릭하면 링크로 이동합니다.</div>
+  </header>
+
+  <!-- 떠다니는 이미지들이 놓일 무대 -->
+  <div class="sky" id="sky" aria-hidden="false"></div>
+
+  <!-- 자바스크립트 비활성화 대비 텍스트 링크 -->
+  <ul class="sr-only" aria-label="아카이빙 링크 목록">
+    <li><a href="https://i.imgur.com/example1.png" target="_blank" rel="noopener">1차 시안</a></li>
+    <li><a href="https://i.imgur.com/example2.png" target="_blank" rel="noopener">전시 설치 사진</a></li>
   </ul>
 
-  <a href="./index.html">← 메인으로 돌아가기</a>
-</body>
-</html>
+  <a class="back" href="./index.html" aria-label="메인으로 돌아가기">← 메인으로 돌아가기</a>
 
+<script>
+/* ===========================
+   1) 여기에 이미지와 링크를 추가하세요
+   =========================== */
+const items = [
+  { img: "https://i.postimg.cc/FzDbWjms/pul.png", href: "https://www.instagram.com/kaywon_right/", label: "잡초" },
+  { img: "https://i.postimg.cc/s2x277HT/jemog.png", href: "https://www.instagram.com/p/CADPIf3JpQV/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==", label: "도진 돌" },
+  { img: "https://i.postimg.cc/bvZn0smG/IMG-6810.png", href: "https://vt.tiktok.com/ZSybnwPFf/", label: "머라이어캐리" },
+  { img: "https://i.postimg.cc/Dymb3WKd/jasan-24-8.png", href: "https://www.instagram.com/hepzzzzi/", label: "헵시바" },
+
+  
+  
+  // 더 추가 예시:
+  // { img: "이미지URL", href: "이동할URL", label: "설명" },
+];
+
+/* ===========================
+   2) 옵션 (원하면 조절)
+   =========================== */
+const MIN_SIZE = 120;   // 각 카드의 최소 너비(px)
+const MAX_SIZE = 220;   // 각 카드의 최대 너비(px)
+const MARGIN    = 16;   // 경계와의 여백(px)
+const AVOID_OVERLAP = true; // true면 초기 위치 겹침 최소화 시도
+
+// 애니메이션 재생시간 범위(초)
+const FLOAT_RANGE  = [10, 18];
+const DRIFT_RANGE  = [8, 16];
+const WIGGLE_RANGE = [1.6, 2.4];
+
+// 카드 간 최소 거리(px) – 겹침 회피용(대충)
+const MIN_GAP = 24;
+const MAX_TRIES = 200;
+
+const sky = document.getElementById('sky');
+let placed = [];
+
+function rand(min, max){ return Math.random()*(max-min)+min; }
+function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+function overlaps(r1, r2){
+  return !(r2.left > r1.right + MIN_GAP ||
+           r2.right < r1.left  - MIN_GAP ||
+           r2.top > r1.bottom + MIN_GAP ||
+           r2.bottom < r1.top  - MIN_GAP);
+}
+
+function placeNonOverlapping(w, h, tries=MAX_TRIES){
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  for(let i=0;i<tries;i++){
+    const left = rand(MARGIN, vw - w - MARGIN);
+    const top  = rand(MARGIN + 80, vh - h - MARGIN); // 헤더 고려
+    const rect = {left, top, right:left+w, bottom:top+h};
+    if(!AVOID_OVERLAP || placed.every(p => !overlaps(p, rect))){
+      placed.push(rect);
+      return {left, top};
+    }
+  }
+  // 실패 시 그냥 무작위 배치
+  const left = clamp(rand(MARGIN, vw - w - MARGIN), MARGIN, vw - w - MARGIN);
+  const top  = clamp(rand(MARGIN + 80, vh - h - MARGIN), MARGIN + 80, vh - h - MARGIN);
+  const rect = {left, top, right:left+w, bottom:top+h};
+  placed.push(rect);
+  return {left, top};
+}
+
+function createSprite({img, href, label}){
+  const size = Math.round(rand(MIN_SIZE, MAX_SIZE));
+  const pos = placeNonOverlapping(size, size * .66); // 대략 가로형 비율 가정
+
+  const sprite = document.createElement('div');
+  sprite.className = 'sprite';
+  sprite.style.left = pos.left + 'px';
+  sprite.style.top  = pos.top  + 'px';
+  sprite.style.setProperty('--floatDur', rand(...FLOAT_RANGE) + 's');
+  sprite.style.animationDelay = rand(-6, 6) + 's';
+
+  const drift = document.createElement('div');
+  drift.className = 'drift';
+  drift.style.setProperty('--driftDur', rand(...DRIFT_RANGE) + 's');
+  drift.style.animationDelay = rand(-6, 6) + 's';
+
+  const a = document.createElement('a');
+  a.className = 'card wiggle';
+  a.href = href;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.style.setProperty('--wiggleDur', rand(...WIGGLE_RANGE) + 's');
+  a.style.animationDelay = rand(-2, 2) + 's';
+  a.setAttribute('aria-label', label);
+
+  const image = document.createElement('img');
+  image.src = img;
+  image.alt = label;
+  image.width = size;
+
+  a.appendChild(image);
+  drift.appendChild(a);
+  sprite.appendChild(drift);
+  sky.appendChild(sprite);
+}
+
+function init(){
+  sky.innerHTML = '';
+  placed = [];
+  items.forEach(createSprite);
+}
+
+init();
+
+// 창 크기 변경 시 재배치(애니메이션 유지)
+let resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ init(); }, 0
+                          );
+});
+
+// 안전장치: 이미지 로드 실패 시 텍스트 링크로 대체
+window.addEventListener('error', (e)=>{
+  const t = e.target;
+  if(t.tagName === 'IMG'){
+    const a = t.closest('a.card');
+    if(a){
+      const fallback = document.createElement('div');
+      fallback.style.cssText = `
+        padding:14px; background:#fff; border-radius:12px; border:1px solid #0002;
+        font-size:14px; line-height:1.4; min-width:160px;
+      `;
+      fallback.textContent = a.getAttribute('aria-label') || '링크 열기';
+      a.replaceChildren(fallback);
+    }
+  }
+}, true);
+</script>
+</body>
 </html>
